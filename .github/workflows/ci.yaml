@@ -1,0 +1,38 @@
+name: Run Tests for Updated Workspaces
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workspace: [app-a, app-b]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Determine modified workspaces
+        id: check-changes
+        run: |
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} > changes.txt
+          echo "changes=$(cat changes.txt)" >> $GITHUB_ENV
+
+      - name: Run tests
+        if: contains(env.changes, matrix.workspace)
+        run: cd packages/${{ matrix.workspace }} && yarn test
