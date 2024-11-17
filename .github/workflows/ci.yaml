@@ -24,14 +24,15 @@ jobs:
           node-version: '22'
           cache: 'yarn'
 
-      - name: Install dependencies
-        run: yarn install
-
       - name: Determine affected packages
         id: affected
         run: |
           npx changeset status --since --json > affected.json
           echo "affected=$(cat affected.json | jq -r '.packages[]')" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        if: env.affected
+        run: yarn install
 
       - name: Run tests for affected workspaces
         if: env.affected
