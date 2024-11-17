@@ -24,10 +24,13 @@ jobs:
           node-version: '22'
           cache: 'yarn'
 
+      # - name: Install Changesets CLI
+      #   run: yarn add @changesets/cli
+
       - name: Determine affected packages
         id: affected
         run: |
-          npx changeset status --since --json > affected.json
+          npx -c "changeset status --since --json > affected.json"
           echo "affected=$(cat affected.json | jq -r '.packages[]')" >> $GITHUB_ENV
 
       - name: Install dependencies
