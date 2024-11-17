@@ -24,8 +24,8 @@ jobs:
           node-version: '22'
           cache: 'yarn'
 
-      # - name: Install Changesets CLI
-      #   run: yarn add @changesets/cli
+      - name: Install Changesets CLI
+        run: yarn add @changesets/cli
 
       - name: Determine affected packages
         id: affected
