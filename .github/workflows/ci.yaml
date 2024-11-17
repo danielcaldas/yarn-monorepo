@@ -27,12 +27,13 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Determine modified workspaces
-        id: check-changes
+      - name: Determine affected packages
+        id: affected
         run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} > changes.txt
-          echo "changes=$(cat changes.txt)" >> $GITHUB_ENV
+          npx changeset status --since --json > affected.json
+          echo "affected=$(cat affected.json | jq -r '.packages[]')" >> $GITHUB_ENV
 
-      - name: Run tests
-        if: contains(env.changes, matrix.workspace)
-        run: cd packages/${{ matrix.workspace }} && yarn test
+      - name: Run tests for affected workspaces
+        if: env.affected
+        run: |
+          echo "${{ env.affected }}" | tr ' ' '\n' | xargs -I {} bash -c 'cd packages/{} && yarn test'
